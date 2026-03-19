@@ -12,10 +12,10 @@ const Home = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight mb-6">
             Build Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">Dream Career</span> with AI
           </h1>
-          <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
             Create a professional, ATS-optimized resume in minutes with AI-powered suggestions and professional templates.
           </p>
           <div className="flex flex-wrap gap-4">
@@ -23,7 +23,7 @@ const Home = () => {
               Start Building Now
               <Zap size={20} />
             </Link>
-            <Link to="/login" className="px-8 py-3 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-all font-semibold">
+            <Link to="/login" className="px-8 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-semibold">
               View Examples
             </Link>
           </div>
@@ -35,7 +35,7 @@ const Home = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative"
         >
-          <div className="absolute -inset-4 bg-primary-100 rounded-3xl blur-2xl opacity-50 -z-10 animate-pulse"></div>
+          <div className="absolute -inset-4 bg-primary-100 dark:bg-primary-900/20 rounded-3xl blur-2xl opacity-50 -z-10 animate-pulse"></div>
           <img 
             src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=1470&auto=format&fit=crop" 
             alt="Resume Preview" 
@@ -55,11 +55,11 @@ const Home = () => {
             whileHover={{ y: -10 }}
             className="p-8 glass rounded-2xl"
           >
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="w-12 h-12 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               {feature.icon}
             </div>
             <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-            <p className="text-slate-600">{feature.desc}</p>
+            <p className="text-slate-600 dark:text-slate-400">{feature.desc}</p>
           </motion.div>
         ))}
       </div>
