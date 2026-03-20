@@ -30,6 +30,11 @@ A modern, full-stack web application designed to help users quickly and easily b
    - Passwords securely hashed with `bcryptjs`.
    - A dedicated dashboard to manage and delete saved resumes.
 
+6. **Help Center & Direct Support**
+   - Comprehensive Help page with information on AI Resume Building and ATS Checking.
+   - Direct contact buttons for WhatsApp and Email Support for instant assistance.
+   - Modern, responsive layout with smooth entrance animations.
+
 ---
 
 ## 💻 Tech Stack
@@ -50,6 +55,8 @@ A modern, full-stack web application designed to help users quickly and easily b
 - **Image Uploads/Parsing:** Multer 
 - **AI Integration:** OpenAI API SDK
 - **Authentication:** jsonwebtoken (JWT), bcryptjs
+- **Error Handling:** Global handlers for `uncaughtException` and `unhandledRejection` for enhanced server stability.
+- **RESTful API:** Standardized JSON error responses for consistent frontend-backend communication.
 
 ---
 
