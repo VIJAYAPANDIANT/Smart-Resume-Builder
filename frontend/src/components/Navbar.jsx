@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FileText, LogOut, User as UserIcon, LayoutDashboard, PlusCircle, Sun, Moon, ShieldCheck } from 'lucide-react';
+import { FileText, LogOut, User as UserIcon, LayoutDashboard, PlusCircle, Sun, Moon, ShieldCheck, HelpCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
@@ -53,6 +53,10 @@ const Navbar = () => {
             <Link to="/builder" className="flex items-center gap-1.5 text-slate-600 hover:text-primary-600 font-medium transition-colors">
               <PlusCircle size={20} />
               Create
+            </Link>
+            <Link to="/help" className="flex items-center gap-1.5 text-slate-600 hover:text-primary-600 font-medium transition-colors">
+              <HelpCircle size={20} />
+              Help us
             </Link>
             
             <button 

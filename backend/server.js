@@ -6,6 +6,18 @@ const morgan = require('morgan');
 
 const app = express();
 
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.error(err.name, err.message, err.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.error(err.name, err.message, err.stack);
+  process.exit(1);
+});
+
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -29,10 +41,14 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-  // Heartbeat to keep process active and verify life in logs
-  setInterval(() => {
-    console.log(`Heartbeat at ${new Date().toISOString()} - SQLite DB active`);
-  }, 10000);
+const server = app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+    // Heartbeat to keep process active and verify life in logs
+    setInterval(() => {
+        console.log(`Heartbeat at ${new Date().toISOString()} - SQLite DB active`);
+    }, 10000);
+});
+
+server.on('error', (err) => {
+    console.error('Server error:', err);
 });

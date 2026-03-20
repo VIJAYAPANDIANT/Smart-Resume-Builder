@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Builder from './pages/Builder';
 import ATSChecker from './pages/ATSChecker';
+import Help from './pages/Help';
 import Navbar from './components/Navbar';
 import ResumePreview from './components/ResumePreview';
 
@@ -32,6 +33,7 @@ function App() {
               <Route path="/builder" element={<PrivateRoute><Builder /></PrivateRoute>} />
               <Route path="/builder/:id" element={<PrivateRoute><Builder /></PrivateRoute>} />
               <Route path="/ats-checker" element={<PrivateRoute><ATSChecker /></PrivateRoute>} />
+              <Route path="/help" element={<Help />} />
             </Routes>
           </div>
         </Router>

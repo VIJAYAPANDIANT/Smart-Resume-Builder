@@ -21,7 +21,11 @@ const Register = () => {
       await register(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to register');
+      if (!err.response) {
+        setError('Server is unreachable. Please ensure the backend is running.');
+      } else {
+        setError(err.response.data?.msg || 'Failed to register');
+      }
     } finally {
       setLoading(false);
     }
