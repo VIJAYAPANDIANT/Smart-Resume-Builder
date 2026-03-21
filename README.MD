@@ -38,7 +38,7 @@
 
 ## 🌐 Live Demo
 
-> 🚀 **[View the Live App on Vercel →](https://your-vercel-url.vercel.app)**
+> 🚀 **[View the Live App on Vercel →](https://smart-resume-builder-a1ej.vercel.app)**
 
 ---
 
