@@ -19,9 +19,7 @@ const PrivateRoute = ({ children }) => {
 };
 
 const RootRedirect = () => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  return user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+  return <Navigate to="/login" />;
 };
 
 function App() {
