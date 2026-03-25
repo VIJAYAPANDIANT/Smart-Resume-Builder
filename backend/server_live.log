@@ -1,0 +1,10 @@
+Server started on port 8000
+SQLite Database Connected and Initialized
+SQLite Connected
+Heartbeat at 2026-03-25T05:05:16.911Z - SQLite DB active
+Heartbeat at 2026-03-25T05:05:26.924Z - SQLite DB active
+Heartbeat at 2026-03-25T05:05:36.926Z - SQLite DB active
+Heartbeat at 2026-03-25T05:05:46.935Z - SQLite DB active
+[0mGET / [32m200[0m 1.628 ms - 35[0m
+Heartbeat at 2026-03-25T05:05:56.938Z - SQLite DB active
+Heartbeat at 2026-03-25T05:06:06.939Z - SQLite DB active
