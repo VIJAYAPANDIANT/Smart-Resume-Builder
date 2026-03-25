@@ -18,6 +18,12 @@ const PrivateRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
+const RootRedirect = () => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  return user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+};
+
 function App() {
   return (
     <ThemeProvider>
@@ -26,7 +32,7 @@ function App() {
           <div className="min-h-screen">
             <Navbar />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
