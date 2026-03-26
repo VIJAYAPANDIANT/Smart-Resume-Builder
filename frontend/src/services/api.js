@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:8000/api' });
+const API = axios.create({ baseURL: 'http://localhost:8001/api' });
 
 API.interceptors.request.use((req) => {
   if (localStorage.getItem('token')) {
