@@ -7,10 +7,18 @@ let db;
 async function initDb() {
   if (db) return db;
 
-  db = await open({
-    filename: path.join(__dirname, '../database.sqlite'),
-    driver: sqlite3.Database
-  });
+  try {
+    db = await open({
+      filename: path.join(__dirname, '../database.sqlite'),
+      driver: sqlite3.Database
+    });
+    console.log('SQLite Database Connected');
+  } catch (err) {
+    console.error('CRITICAL: SQLite Database Connection Failed:', err.message);
+    // If it's a read-only environment or other failure, we might want to throw or handle specially.
+    // However, on Vercel, if the file exists, it should be openable.
+    throw err;
+  }
 
   // Create Users table
   await db.exec(`

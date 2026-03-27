@@ -14,7 +14,13 @@ const logger = (msg) => {
   const timestamp = new Date().toISOString();
   const logMsg = `[${timestamp}] ${msg}\n`;
   console.log(msg);
-  fs.appendFileSync(logFile, logMsg);
+  
+  // Try to write to file, but ignore failures (common on serverless/read-only environments)
+  try {
+    fs.appendFileSync(logFile, logMsg);
+  } catch (err) {
+    // Ignore logging errors in serverless environments
+  }
 };
 
 process.on('uncaughtException', (err) => {
