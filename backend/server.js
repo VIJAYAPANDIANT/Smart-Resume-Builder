@@ -55,8 +55,13 @@ app.use(async (req, res, next) => {
         await initDb();
         next();
     } catch (err) {
-        console.error('DATABASE INIT ERROR:', err.message);
-        res.status(500).json({ error: 'Database Initialization Error' });
+        console.error(`DATABASE INIT ERROR during ${req.path}:`, err.message);
+        logger(`Database initialization error: ${err.message}`);
+        res.status(500).json({ 
+            error: 'Database Initialization Error', 
+            details: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 });
 
