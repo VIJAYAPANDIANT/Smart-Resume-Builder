@@ -7,16 +7,21 @@ let db;
 async function initDb() {
   if (db) return db;
 
+  const isVercelByEnv = process.env.VERCEL === '1' || !!process.env.VERCEL;
+  const dbPath = isVercelByEnv ? ':memory:' : path.join(__dirname, '../database.sqlite');
+  
+  if (isVercelByEnv) {
+    console.log('DEBUG: Running in VERCEL mode - Using IN-MEMORY database for writes');
+  }
+
   try {
     db = await open({
-      filename: path.join(__dirname, '../database.sqlite'),
+      filename: dbPath,
       driver: sqlite3.Database
     });
-    console.log('SQLite Database Connected');
+    console.log(`SQLite Database Connected to ${isVercelByEnv ? 'IN-MEMORY' : 'persistent file'}`);
   } catch (err) {
     console.error('CRITICAL: SQLite Database Connection Failed:', err.message);
-    // If it's a read-only environment or other failure, we might want to throw or handle specially.
-    // However, on Vercel, if the file exists, it should be openable.
     throw err;
   }
 
