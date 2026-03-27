@@ -4,6 +4,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/backend/server.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ]
 }
