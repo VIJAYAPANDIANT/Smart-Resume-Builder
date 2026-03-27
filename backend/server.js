@@ -35,14 +35,29 @@ process.on('unhandledRejection', (err) => {
 
 const { initDb } = require('./config/db');
 
-// Middleware to ensure DB is initialized
+// Health Check Endpoint (Standalone - no DB dependency)
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'ok', 
+        message: 'Backend is reachable', 
+        environment: process.env.VERCEL ? 'vercel' : 'local',
+        timestamp: new Date().toISOString() 
+    });
+});
+
+// Middleware to ensure DB is initialized (skipped for health check)
 app.use(async (req, res, next) => {
+    if (req.path === '/api/health' || req.path === '/') {
+        return next();
+    }
+    
     try {
         await initDb();
         next();
     } catch (err) {
+        console.error(`DATABASE INIT ERROR during ${req.path}:`, err.message);
         logger(`Database initialization error: ${err.message}`);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send('Database Initialization Error');
     }
 });
 
@@ -52,13 +67,17 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/resumes', require('./routes/resumeRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes'));
+// Routes with extra protection
+try {
+    app.use('/api/auth', require('./routes/authRoutes'));
+    app.use('/api/resumes', require('./routes/resumeRoutes'));
+    app.use('/api/ai', require('./routes/aiRoutes'));
+} catch (err) {
+    console.error('CRITICAL: Route Registration Failed:', err);
+}
 
 app.get('/', (req, res) => {
-  res.send('Smart Resume Builder API is running');
+  res.send('Smart Resume Builder API is running. Check /api/health for status.');
 });
 
 // Port configuration
