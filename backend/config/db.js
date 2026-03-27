@@ -1,68 +1,28 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
-const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
-let db;
+let supabase;
 
 async function initDb() {
-  if (db) return db;
+  if (supabase) return supabase;
 
-  const isVercelByEnv = process.env.VERCEL === '1' || !!process.env.VERCEL;
-  const dbPath = isVercelByEnv ? ':memory:' : path.join(__dirname, '../database.sqlite');
-  
-  if (isVercelByEnv) {
-    console.log('DEBUG: Running in VERCEL mode - Using IN-MEMORY database for writes');
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('CRITICAL: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.');
+    return null;
   }
 
-  try {
-    db = await open({
-      filename: dbPath,
-      driver: sqlite3.Database
-    });
-    console.log(`SQLite Database Connected to ${isVercelByEnv ? 'IN-MEMORY' : 'persistent file'}`);
-  } catch (err) {
-    console.error('CRITICAL: SQLite Database Connection Failed:', err.message);
-    throw err;
-  }
-
-  // Create Users table
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  // Create Resumes table
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS resumes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId INTEGER NOT NULL,
-      personalInfo TEXT, -- JSON string
-      education TEXT, -- JSON string
-      experience TEXT, -- JSON string
-      skills TEXT, -- JSON string
-      projects TEXT, -- JSON string
-      template TEXT DEFAULT 'modern',
-      atsScore INTEGER DEFAULT 0,
-      aiSuggestions TEXT, -- JSON string
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (userId) REFERENCES users(id)
-    )
-  `);
-
-  console.log('SQLite Database Connected and Initialized');
-  return db;
+  supabase = createClient(supabaseUrl, supabaseKey);
+  console.log('Supabase Client Initialized');
+  return supabase;
 }
 
 const getDb = () => {
-  if (!db) {
-    throw new Error('Database not initialized. Call initDb() first.');
+  if (!supabase) {
+    throw new Error('Supabase client not initialized. Check your environment variables.');
   }
-  return db;
+  return supabase;
 };
 
 module.exports = { initDb, getDb };

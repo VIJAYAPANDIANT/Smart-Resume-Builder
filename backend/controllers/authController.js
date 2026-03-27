@@ -15,8 +15,12 @@ exports.register = async (req, res) => {
       res.json({ token });
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server Error' });
+    console.error('AUTH REGISTER ERROR:', err.message);
+    res.status(500).json({ 
+        msg: 'Server Error', 
+        details: err.message,
+        hint: 'Did you run schema.sql in Supabase?' 
+    });
   }
 };
 
@@ -35,8 +39,11 @@ exports.login = async (req, res) => {
       res.json({ token });
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server Error' });
+    console.error('AUTH LOGIN ERROR:', err.message);
+    res.status(500).json({ 
+        msg: 'Server Error', 
+        details: err.message 
+    });
   }
 };
 
@@ -46,7 +53,10 @@ exports.getUser = async (req, res) => {
     if (user) delete user.password;
     res.json(user);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server Error' });
+    console.error('AUTH GETUSER ERROR:', err.message);
+    res.status(500).json({ 
+        msg: 'Server Error', 
+        details: err.message 
+    });
   }
 };
