@@ -14,52 +14,28 @@ const logger = (msg) => {
   const timestamp = new Date().toISOString();
   const logMsg = `[${timestamp}] ${msg}\n`;
   console.log(msg);
-  
-  // Try to write to file, but ignore failures (common on serverless/read-only environments)
   try {
     fs.appendFileSync(logFile, logMsg);
-  } catch (err) {
-    // Ignore logging errors in serverless environments
-  }
+  } catch (err) {}
 };
 
-process.on('uncaughtException', (err) => {
-  logger(`CRITICAL: UNCAUGHT EXCEPTION! 💥 ${err.name} ${err.message} ${err.stack}`);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (err) => {
-  logger(`CRITICAL: UNHANDLED REJECTION! 💥 ${err.name} ${err.message} ${err.stack}`);
-  process.exit(1);
-});
-
-const { initDb } = require('./config/db');
-
-// Health Check Endpoint (Standalone - no DB dependency)
+// 1. ABSOLUTE TOP HEALTH CHECK (No dependencies)
 app.get('/api/health', (req, res) => {
     res.status(200).json({ 
         status: 'ok', 
-        message: 'Backend is reachable', 
-        environment: process.env.VERCEL ? 'vercel' : 'local',
+        message: 'Minimal boot successful',
         timestamp: new Date().toISOString() 
     });
 });
 
-// Middleware to ensure DB is initialized (skipped for health check)
-app.use(async (req, res, next) => {
-    if (req.path === '/api/health' || req.path === '/') {
-        return next();
-    }
-    
-    try {
-        await initDb();
-        next();
-    } catch (err) {
-        console.error(`DATABASE INIT ERROR during ${req.path}:`, err.message);
-        logger(`Database initialization error: ${err.message}`);
-        res.status(500).send('Database Initialization Error');
-    }
-});
+// 2. PROTECTED REQUIRES
+let initDb;
+try {
+    const dbConfig = require('./config/db');
+    initDb = dbConfig.initDb;
+} catch (err) {
+    console.error('FAILED TO LOAD DB CONFIG:', err.message);
+}
 
 // Middleware
 app.use(express.json());
@@ -67,47 +43,46 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Routes with extra protection
+// 3. LAZY DB INITIALIZATION MIDDLEWARE
+app.use(async (req, res, next) => {
+    if (req.path === '/api/health' || req.path === '/') return next();
+    
+    if (!initDb) {
+        return res.status(500).json({ error: 'Database module failed to load' });
+    }
+
+    try {
+        await initDb();
+        next();
+    } catch (err) {
+        console.error('DATABASE INIT ERROR:', err.message);
+        res.status(500).json({ error: 'Database Initialization Error' });
+    }
+});
+
+// 4. PROTECTED ROUTE REGISTRATION
 try {
     app.use('/api/auth', require('./routes/authRoutes'));
     app.use('/api/resumes', require('./routes/resumeRoutes'));
     app.use('/api/ai', require('./routes/aiRoutes'));
 } catch (err) {
-    console.error('CRITICAL: Route Registration Failed:', err);
+    console.error('FAILED TO REGISTER ROUTES:', err.message);
 }
 
 app.get('/', (req, res) => {
-  res.send('Smart Resume Builder API is running. Check /api/health for status.');
+  res.send('Smart Resume Builder API is running. Check /api/health');
 });
 
-// Port configuration
 const PORT = process.env.PORT || 8001;
 
-// Startup Function
 const startServer = async () => {
     try {
-        logger('Starting server initialization...');
-        
-        // Connect to SQLite (handled by middleware but calling here for local start)
-        await initDb();
-        logger('SQLite Connected and Initialized');
-
-        const server = app.listen(PORT, '0.0.0.0', () => {
-            logger(`Server successfully started on port ${PORT}`);
-            
-            // Heartbeat to monitor system health
-            setInterval(() => {
-                logger('Heartbeat: System active and DB connected');
-            }, 60000); // 1 minute heartbeat
+        if (initDb) await initDb();
+        app.listen(PORT, '0.0.0.0', () => {
+            logger(`Server started on port ${PORT}`);
         });
-
-        server.on('error', (err) => {
-            logger(`SERVER ERROR: ${err.message}`);
-        });
-
     } catch (err) {
-        logger(`FAILED TO START SERVER: ${err.message} ${err.stack}`);
-        process.exit(1);
+        logger(`STARTUP ERROR: ${err.message}`);
     }
 };
 
