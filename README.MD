@@ -4,7 +4,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Node Version](https://img.shields.io/badge/v18+-brightgreen?style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
 ---
@@ -92,7 +92,7 @@ User Registers / Logs In (JWT issued)
     (Form + Live Preview)                         │
           │                                       │
           ▼                                       ▼
-  Save Resume to SQLite DB           ATS Checker (Upload Image)
+  Save Resume to Supabase DB         ATS Checker (Upload Image)
           │                                       │
           ▼                                       ▼
    Dashboard (Manage Resumes)    OpenAI Vision API → Score + Feedback
@@ -121,7 +121,7 @@ User Registers / Logs In (JWT issued)
 |---|---|---|
 | **Node.js** | v18+ | Runtime Environment |
 | **Express.js** | 4.x | Web Server & REST API |
-| **SQLite** (sqlite3) | 6.x | Embedded Local Database |
+| **Supabase** (@supabase/supabase-js) | 2.x | Cloud Database Service |
 | **OpenAI SDK** | 4.x | AI Vision Resume Analysis |
 | **Multer** | 2.x | Multipart Image Upload |
 | **jsonwebtoken** | 9.x | JWT Authentication |
@@ -138,7 +138,7 @@ User Registers / Logs In (JWT issued)
 📦 Smart-Resume-Builder/
 ├── 📁 backend/                    # Express.js API Server
 │   ├── 📁 config/
-│   │   └── 📄 db.js               # SQLite DB initialization (initDb)
+│   │   └── 📄 db.js               # Supabase Client Initialization
 │   ├── 📁 controllers/
 │   │   ├── 📄 authController.js   # Register & Login logic
 │   │   ├── 📄 resumeController.js # Resume CRUD operations
@@ -150,7 +150,7 @@ User Registers / Logs In (JWT issued)
 │   │   ├── 📄 authRoutes.js       # POST /api/auth/register, /login
 │   │   ├── 📄 resumeRoutes.js     # GET/POST/DELETE /api/resumes
 │   │   └── 📄 aiRoutes.js         # POST /api/ai/analyze-ats-image
-│   ├── 📄 database.sqlite         # Local SQLite database file
+│   ├── 📄 schema.sql              # Supabase database schema
 │   └── 📄 server.js               # Entry point (Express app setup)
 │
 ├── 📁 frontend/                   # React 18 + Vite UI
@@ -207,7 +207,7 @@ Create a `.env` file in the `backend/` folder (see [Environment Variables](#-env
 ```bash
 node server.js
 # ✅ Server starts on http://localhost:5000
-# ✅ SQLite Connected
+# ✅ Supabase Client Initialized
 ```
 
 ### 3. Frontend Setup
@@ -238,6 +238,10 @@ JWT_SECRET=your_super_secret_jwt_key_here
 
 # OpenAI — required for the ATS Checker feature
 OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Supabase — PostgreSQL Database
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
 ```
 
 > ⚠️ **Never commit your `.env` file.** Ensure it is listed in `.gitignore`.
