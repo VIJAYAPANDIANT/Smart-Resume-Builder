@@ -27,6 +27,19 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
+const { initDb } = require('./config/db');
+
+// Middleware to ensure DB is initialized
+app.use(async (req, res, next) => {
+    try {
+        await initDb();
+        next();
+    } catch (err) {
+        logger(`Database initialization error: ${err.message}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -50,8 +63,7 @@ const startServer = async () => {
     try {
         logger('Starting server initialization...');
         
-        // Connect to SQLite
-        const { initDb } = require('./config/db');
+        // Connect to SQLite (handled by middleware but calling here for local start)
         await initDb();
         logger('SQLite Connected and Initialized');
 
@@ -74,4 +86,8 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;
