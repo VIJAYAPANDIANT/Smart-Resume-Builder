@@ -1,7 +1,7 @@
-const { OpenAI } = require('openai');
+const { GoogleGenAI } = require('@google/genai');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 exports.getAiSuggestions = async (req, res) => {
@@ -13,13 +13,13 @@ exports.getAiSuggestions = async (req, res) => {
     
     Return as a clean JSON array of strings.`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: { responseMimeType: "application/json" }
     });
 
-    const suggestions = JSON.parse(response.choices[0].message.content);
+    const suggestions = JSON.parse(response.text);
     res.json(suggestions);
   } catch (err) {
     console.error(err);
@@ -37,13 +37,13 @@ exports.getAtsScore = async (req, res) => {
     
     Return JSON format: { "score": number, "explanation": string }`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: { responseMimeType: "application/json" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.text);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -81,26 +81,21 @@ exports.parseResumeImage = async (req, res) => {
     }
     If a field is missing, leave it as an empty string or empty array. Return ONLY the JSON object.`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
         {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${req.file.mimetype};base64,${base64Image}`,
-              },
-            },
-          ],
+          inlineData: {
+            data: base64Image,
+            mimeType: req.file.mimetype
+          }
         },
+        prompt
       ],
-      response_format: { type: "json_object" }
+      config: { responseMimeType: "application/json" }
     });
 
-    const extractedData = JSON.parse(response.choices[0].message.content);
+    const extractedData = JSON.parse(response.text);
     res.json(extractedData);
   } catch (err) {
     console.error('AI Parsing Error:', err);
@@ -135,26 +130,21 @@ exports.analyzeAtsImage = async (req, res) => {
       "summary": "a brief 2-sentence summary of the overall profile"
     }`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
         {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${req.file.mimetype};base64,${base64Image}`,
-              },
-            },
-          ],
+          inlineData: {
+            data: base64Image,
+            mimeType: req.file.mimetype
+          }
         },
+        prompt
       ],
-      response_format: { type: "json_object" }
+      config: { responseMimeType: "application/json" }
     });
 
-    const results = JSON.parse(response.choices[0].message.content);
+    const results = JSON.parse(response.text);
     res.json(results);
   } catch (err) {
     console.error('ATS Analysis Error:', err);
