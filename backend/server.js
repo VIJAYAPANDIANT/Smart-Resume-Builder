@@ -58,9 +58,11 @@ app.use(async (req, res, next) => {
         console.error(`DATABASE INIT ERROR during ${req.path}:`, err.message);
         logger(`Database initialization error: ${err.message}`);
         
-        let hint = 'Please check your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables on Vercel.';
-        if (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND')) {
-            hint = 'Database connection failed. Verify that your Supabase project is active and that the URL is correct.';
+        let hint = 'Please check your DATABASE_URL environment variable.';
+        if (err.message.includes('self-signed certificate') || err.message.includes('SSL')) {
+            hint = 'SSL connection error. Check if SSL is required or if connection parameters are correct.';
+        } else if (err.message.includes('ENOTFOUND') || err.message.includes('ECONNREFUSED')) {
+            hint = 'Database connection failed. Verify that your PostgreSQL database is running and reachable.';
         }
         
         res.status(500).json({ 

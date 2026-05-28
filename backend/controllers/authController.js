@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ 
         msg: 'Server Error', 
         details: err.message,
-        hint: 'Did you run schema.sql in Supabase?' 
+        hint: 'Did you check if the database tables exist? Ensure schema.sql has been run on your PostgreSQL database.' 
     });
   }
 };

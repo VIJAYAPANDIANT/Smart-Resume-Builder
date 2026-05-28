@@ -2,64 +2,58 @@ const { getDb } = require('../config/db');
 
 const Resume = {
   create: async (data) => {
-    const supabase = getDb();
-    const { data: result, error } = await supabase
-      .from('resumes')
-      .insert([data])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return result;
+    const pool = getDb();
+    const keys = Object.keys(data).filter(k => data[k] !== undefined);
+    const columns = keys.map(k => `"${k}"`).join(', ');
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const values = keys.map(k => {
+      const val = data[k];
+      return typeof val === 'object' && val !== null ? JSON.stringify(val) : val;
+    });
+
+    const queryText = `INSERT INTO resumes (${columns}) VALUES (${placeholders}) RETURNING *`;
+    const res = await pool.query(queryText, values);
+    return res.rows[0];
   },
 
   find: async (query) => {
-    const supabase = getDb();
-    const { data, error } = await supabase
-      .from('resumes')
-      .select('*')
-      .eq('userId', query.userId)
-      .order('updatedAt', { ascending: false });
-    
-    if (error) throw error;
-    return data;
+    const pool = getDb();
+    const res = await pool.query(
+      'SELECT * FROM resumes WHERE "userId" = $1 ORDER BY "updatedAt" DESC',
+      [query.userId]
+    );
+    return res.rows;
   },
 
   findById: async (id) => {
-    const supabase = getDb();
-    const { data, error } = await supabase
-      .from('resumes')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    const pool = getDb();
+    const res = await pool.query('SELECT * FROM resumes WHERE id = $1', [id]);
+    return res.rows[0] || null;
   },
 
   findByIdAndUpdate: async (id, update, options) => {
-    const supabase = getDb();
+    const pool = getDb();
     const data = update.$set || update;
     
-    const { data: result, error } = await supabase
-      .from('resumes')
-      .update(data)
-      .eq('id', id)
-      .select()
-      .single();
+    const keys = Object.keys(data).filter(k => data[k] !== undefined && k !== 'id');
+    if (keys.length === 0) {
+      return await Resume.findById(id);
+    }
     
-    if (error) throw error;
-    return result;
+    const setClause = keys.map((k, i) => `"${k}" = $${i + 2}`).join(', ');
+    const values = keys.map(k => {
+      const val = data[k];
+      return typeof val === 'object' && val !== null ? JSON.stringify(val) : val;
+    });
+    
+    const queryText = `UPDATE resumes SET ${setClause}, "updatedAt" = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`;
+    const res = await pool.query(queryText, [id, ...values]);
+    return res.rows[0];
   },
 
   findByIdAndDelete: async (id) => {
-    const supabase = getDb();
-    const { error } = await supabase
-      .from('resumes')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    const pool = getDb();
+    await pool.query('DELETE FROM resumes WHERE id = $1', [id]);
   }
 };
 
