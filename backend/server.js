@@ -57,9 +57,16 @@ app.use(async (req, res, next) => {
     } catch (err) {
         console.error(`DATABASE INIT ERROR during ${req.path}:`, err.message);
         logger(`Database initialization error: ${err.message}`);
+        
+        let hint = 'Please check your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables on Vercel.';
+        if (err.message.includes('fetch failed') || err.message.includes('ENOTFOUND')) {
+            hint = 'Database connection failed. Verify that your Supabase project is active and that the URL is correct.';
+        }
+        
         res.status(500).json({ 
-            error: 'Database Initialization Error', 
+            msg: 'Database Connection Error', 
             details: err.message,
+            hint: hint,
             stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }
