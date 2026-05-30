@@ -17,7 +17,6 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
-    "openai": "^6.39.0",
     "pg": "^8.21.0"
   },
   "keywords": [],
