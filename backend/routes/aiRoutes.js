@@ -9,5 +9,7 @@ router.post('/suggestions', auth, aiController.getAiSuggestions);
 router.post('/ats-score', auth, aiController.getAtsScore);
 router.post('/analyze-ats-image', auth, upload.single('resumeImage'), aiController.analyzeAtsImage);
 router.post('/parse', auth, upload.single('resumeImage'), aiController.parseResumeImage);
+router.post('/tailor', auth, aiController.tailorResumeForJob);
+
 
 module.exports = router;

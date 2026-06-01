@@ -159,3 +159,54 @@ exports.analyzeAtsImage = async (req, res) => {
     res.status(500).json({ error: 'Failed to analyze resume for ATS' });
   }
 };
+
+exports.tailorResumeForJob = async (req, res) => {
+  const { resumeId, jobDescription, jobTitle, companyName } = req.body;
+  try {
+    const Resume = require('../models/Resume');
+    const resume = await Resume.findById(resumeId);
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+    if (resume.userId !== req.user.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    const prompt = `You are an AI expert recruiter and job application advisor. 
+    Analyze the following resume data against the job description for the role of "${jobTitle}" at "${companyName}".
+    
+    Resume Data:
+    ${JSON.stringify(resume)}
+    
+    Job Description:
+    ${jobDescription}
+    
+    Tasks:
+    1. Calculate a match score (0 to 100) representing how well the resume matches the job requirements.
+    2. Identify key matching keywords/skills that are present in both the resume and the job description.
+    3. Identify missing critical keywords/skills that are in the job description but not in the resume.
+    4. Provide 3-5 specific, actionable recommendations on how the user can edit their resume experience or skills sections to better align with the job.
+    5. Write a highly tailored, compelling, professional cover letter (approx. 250-350 words) from the user's perspective, highlighting matching experiences and projects from their resume, addressed to the hiring manager at "${companyName}".
+    
+    Return the response EXACTLY in this JSON format:
+    {
+      "matchScore": number,
+      "matches": ["string"],
+      "gaps": ["string"],
+      "recommendations": ["string"],
+      "coverLetter": "string"
+    }
+    Ensure the JSON is clean and strictly valid. Do not wrap with anything other than the JSON object.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+      }
+    });
+
+    const result = JSON.parse(response.text);
+    res.json(result);
+  } catch (err) {
+    console.error('Job Tailor Error:', err);
+    res.status(500).json({ error: 'Failed to tailor resume' });
+  }
+};
+

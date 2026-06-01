@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FileText, LogOut, User as UserIcon, LayoutDashboard, PlusCircle, Sun, Moon, ShieldCheck, HelpCircle } from 'lucide-react';
+import { FileText, LogOut, User as UserIcon, LayoutDashboard, PlusCircle, Sun, Moon, ShieldCheck, HelpCircle, Sparkles } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
@@ -50,6 +50,10 @@ const Navbar = () => {
               <ShieldCheck size={20} />
               ATS Checker
             </Link>
+            <Link to="/job-tailor" className="flex items-center gap-1.5 text-slate-600 hover:text-primary-600 font-medium transition-colors">
+              <Sparkles size={20} />
+              AI Job Tailor
+            </Link>
             <Link to="/builder" className="flex items-center gap-1.5 text-slate-600 hover:text-primary-600 font-medium transition-colors">
               <PlusCircle size={20} />
               Create
@@ -58,6 +62,7 @@ const Navbar = () => {
               <HelpCircle size={20} />
               Help us
             </Link>
+
             
             <button 
               onClick={toggleTheme}
