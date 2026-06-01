@@ -4,12 +4,12 @@
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Node Version](https://img.shields.io/badge/v18+-brightgreen?style=for-the-badge)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75C2?style=for-the-badge&logo=googlegemini&logoColor=white)
 
 ---
 
-**Smart Resume Builder** is a full-stack, production-ready web application that enables users to **build professional resumes, check ATS compatibility using AI, and export polished PDFs instantly**. It features a live preview builder, OpenAI-powered resume scoring, JWT authentication, and a personal dashboard — all built with a modern tech stack and designed for a premium user experience. Deployed on **Vercel**.
+**Smart Resume Builder** is a full-stack, production-ready web application that enables users to **build professional resumes, check ATS compatibility using AI, and export polished PDFs instantly**. It features a live preview builder, Gemini-powered resume scoring, JWT authentication, and a personal dashboard — all built with a modern tech stack and designed for a premium user experience. Deployed on **Vercel**.
 
 ---
 
@@ -32,7 +32,7 @@
 
 ## 🔍 Overview
 
-**Smart Resume Builder** gives job seekers a complete edge. Users sign up, build their resume with a guided form and **live side-by-side preview**, save it to their personal dashboard, and then run it through an **AI-powered ATS Checker** that uses OpenAI's Vision API to return a score, strengths, weaknesses, and specific improvement recommendations. Resumes can be exported to print-ready multi-page PDFs at any time.
+**Smart Resume Builder** gives job seekers a complete edge. Users sign up, build their resume with a guided form and **live side-by-side preview**, save it to their personal dashboard, and then run it through an **AI-powered ATS Checker** that uses Google Gemini 2.5 Flash to return a score, strengths, weaknesses, and specific improvement recommendations. Resumes can be exported to print-ready multi-page PDFs at any time.
 
 ---
 
@@ -51,7 +51,7 @@
 
 ### 2. 🤖 AI-Powered ATS Checker
 - Upload an image/screenshot of any resume.
-- Powered by **OpenAI Vision API** — analyzes layout, keywords, and formatting.
+- Powered by **Google Gemini 2.5 Flash API** — analyzes layout, keywords, and formatting.
 - Returns an **ATS score (0–100)** with color-coded rating: Excellent / Good / Needs Work.
 - Detailed breakdown of **Strengths**, **Weaknesses**, and **Recommendations**.
 
@@ -92,10 +92,10 @@ User Registers / Logs In (JWT issued)
     (Form + Live Preview)                         │
           │                                       │
           ▼                                       ▼
-  Save Resume to Supabase DB         ATS Checker (Upload Image)
+  Save Resume to PostgreSQL DB       ATS Checker (Upload Image)
           │                                       │
           ▼                                       ▼
-   Dashboard (Manage Resumes)    OpenAI Vision API → Score + Feedback
+   Dashboard (Manage Resumes)    Gemini 2.5 Flash API → Score + Feedback
           │
           ▼
   Export Resume as PDF (html2pdf.js)
@@ -121,8 +121,8 @@ User Registers / Logs In (JWT issued)
 |---|---|---|
 | **Node.js** | v18+ | Runtime Environment |
 | **Express.js** | 4.x | Web Server & REST API |
-| **Supabase** (@supabase/supabase-js) | 2.x | Cloud Database Service |
-| **OpenAI SDK** | 4.x | AI Vision Resume Analysis |
+| **PostgreSQL** (`pg`) | 8.x | Database Connection Pool |
+| **Google GenAI SDK** (`@google/genai`) | 1.x | AI Gemini 2.5 Flash Resume Analysis |
 | **Multer** | 2.x | Multipart Image Upload |
 | **jsonwebtoken** | 9.x | JWT Authentication |
 | **bcryptjs** | 2.x | Password Hashing |
@@ -186,7 +186,8 @@ User Registers / Logs In (JWT issued)
 
 ### Prerequisites
 - **Node.js v18+** installed
-- An **OpenAI API Key** ([get yours here](https://platform.openai.com/api-keys))
+- A **Google Gemini API Key** ([get yours from Google AI Studio](https://aistudio.google.com/))
+- A **PostgreSQL database** (local instance or cloud database from Neon, Supabase, etc.)
 
 ### 1. Clone the Repository
 
@@ -205,9 +206,9 @@ npm install
 Create a `.env` file in the `backend/` folder (see [Environment Variables](#-environment-variables)), then:
 
 ```bash
-node server.js
-# ✅ Server starts on http://localhost:5000
-# ✅ Supabase Client Initialized
+npm start
+# ✅ Server starts on http://localhost:8001
+# ✅ PostgreSQL Database Connected Successfully
 ```
 
 ### 3. Frontend Setup
@@ -231,17 +232,16 @@ Create a `.env` file in the `backend/` directory:
 
 ```env
 # Server Port
-PORT=5000
+PORT=8001
 
 # Authentication — use a long, random secret string
 JWT_SECRET=your_super_secret_jwt_key_here
 
-# OpenAI — required for the ATS Checker feature
-OPENAI_API_KEY=sk-your-openai-api-key-here
+# Gemini API Key — required for AI features
+GEMINI_API_KEY=your_gemini_api_key_here
 
-# Supabase — PostgreSQL Database
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
+# PostgreSQL Database Connection URL
+DATABASE_URL=postgresql://username:password@localhost:5432/database
 ```
 
 > ⚠️ **Never commit your `.env` file.** Ensure it is listed in `.gitignore`.
@@ -252,7 +252,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_key
 
 All protected routes require the header:
 ```
-Authorization: Bearer <your_jwt_token>
+x-auth-token: <your_jwt_token>
 ```
 
 ### 🔐 Auth — `/api/auth`
@@ -276,9 +276,13 @@ Authorization: Bearer <your_jwt_token>
 
 | Method | Endpoint | Auth | Body | Description |
 |--------|----------|------|------|-------------|
-| `POST` | `/api/ai/analyze-ats-image` | ✅ | `FormData: { resumeImage: File }` | Analyze resume image, returns ATS score + feedback |
+| `POST` | `/api/ai/suggestions` | ✅ | `{ resumeData }` | Analyze resume text data and return 5-7 improvement suggestions |
+| `POST` | `/api/ai/ats-score` | ✅ | `{ resumeData, targetKeywords: [] }` | Calculate ATS match score against keywords |
+| `POST` | `/api/ai/analyze-ats-image` | ✅ | `FormData: { resumeImage: File }` | Analyze a resume screenshot/image for ATS score & feedback |
+| `POST` | `/api/ai/parse` | ✅ | `FormData: { resumeImage: File }` | Extract structural JSON resume data from a resume image |
+| `POST` | `/api/ai/tailor` | ✅ | `{ resumeId, jobDescription, jobTitle, companyName }` | Tailor resume for job and generate matching cover letter |
 
-**Example ATS Response:**
+**Example `/api/ai/analyze-ats-image` Response:**
 ```json
 {
   "score": 78,
@@ -301,21 +305,14 @@ Authorization: Bearer <your_jwt_token>
 2. Ensure `node_modules` is in `.gitignore`.
 3. Go to [vercel.com](https://vercel.com) → **Import** your repository.
 4. Set **Root Directory** to `frontend`.
-5. Vercel will auto-detect Vite and run `npx vite build`.
+5. Add the environment variable `VITE_API_BASE_URL` pointing to your deployed backend API URL (e.g. `https://your-backend.onrender.com/api`).
+6. Vercel will auto-detect Vite and run `npm run build`.
 
 ### Backend → Render / Railway
 
 1. Deploy the `backend/` folder as a **Node.js Web Service**.
-2. Set all environment variables (`PORT`, `JWT_SECRET`, `OPENAI_API_KEY`) in the dashboard.
+2. Set all environment variables (`PORT`, `JWT_SECRET`, `GEMINI_API_KEY`, `DATABASE_URL`) in the dashboard.
 3. Set the **Start Command** to: `node server.js`
-4. After deployment, copy your live backend URL and update `frontend/src/services/api.js`:
-
-```js
-// Change from:
-baseURL: 'http://localhost:5000/api'
-// To:
-baseURL: 'https://your-backend.onrender.com/api'
-```
 
 ---
 
